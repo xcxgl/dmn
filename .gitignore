@@ -1,0 +1,9 @@
+save/
+logs/
+data/
+data
+.idea/
+__pycache__
+.python-version
+glove.6B.zip
+tasks_1-20_v1-2.tar.gz

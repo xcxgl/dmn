@@ -1,0 +1,80 @@
+C:\Users\xucui\AppData\Local\Programs\Python\Python35\python.exe D:/人大/研二/毕设/dmn/dmn/main.py
+Loaded 10000 data from bAbI train task 1
+Loaded 1000 data from bAbI test task 1
+Word count: 21, Max sentence len : 7
+Building DMN...
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "BestSplits" device_type: "CPU"') for unknown op: BestSplits
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "CountExtremelyRandomStats" device_type: "CPU"') for unknown op: CountExtremelyRandomStats
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "FinishedNodes" device_type: "CPU"') for unknown op: FinishedNodes
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "GrowTree" device_type: "CPU"') for unknown op: GrowTree
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "ReinterpretStringToFloat" device_type: "CPU"') for unknown op: ReinterpretStringToFloat
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "SampleInputs" device_type: "CPU"') for unknown op: SampleInputs
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "ScatterAddNdim" device_type: "CPU"') for unknown op: ScatterAddNdim
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "TopNInsert" device_type: "CPU"') for unknown op: TopNInsert
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "TopNRemove" device_type: "CPU"') for unknown op: TopNRemove
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "TreePredictions" device_type: "CPU"') for unknown op: TreePredictions
+E c:\tf_jenkins\home\workspace\release-win\device\cpu\os\windows\tensorflow\core\framework\op_kernel.cc:943] OpKernel ('op: "UpdateFertileSlots" device_type: "CPU"') for unknown op: UpdateFertileSlots
+Training 256 epochs ...
+Epoch:   4%|█▉                                                    | 9/256 [02:16<1:02:38, 15.22s/it]
+[Training] step 700: Accuracy = 22.48% (2014 / 8960), Loss = 7.5202
+Epoch:   7%|███▉                                                 | 19/256 [05:11<1:04:45, 16.40s/it]
+Epoch:   8%|████▏                                                | 20/256 [05:38<1:06:33, 16.92s/it][Training] step 1400: Accuracy = 24.16% (2165 / 8960), Loss = 7.4428
+Epoch:  11%|██████                                               | 29/256 [08:12<1:04:15, 16.98s/it]
+Epoch:  12%|██████▏                                              | 30/256 [08:41<1:05:30, 17.39s/it][Training] step 2100: Accuracy = 19.77% (1771 / 8960), Loss = 7.4954
+Epoch:  15%|████████                                             | 39/256 [11:44<1:05:21, 18.07s/it]
+[Training] step 2800: Accuracy = 21.65% (1940 / 8960), Loss = 7.4792
+Epoch:  16%|████████▎                                            | 40/256 [12:19<1:06:33, 18.49s/it][Validation] step 2800: Accuracy = 19.42% (174 / 896), Loss = 7.4883
+Epoch:  19%|██████████▏                                          | 49/256 [15:17<1:04:36, 18.73s/it]
+Epoch:  20%|██████████▎                                          | 50/256 [15:44<1:04:49, 18.88s/it][Training] step 3500: Accuracy = 22.12% (1982 / 8960), Loss = 7.4409
+Epoch:  23%|████████████▏                                        | 59/256 [18:32<1:01:54, 18.86s/it]
+Epoch:  23%|████████████▍                                        | 60/256 [18:58<1:01:57, 18.97s/it][Training] step 4200: Accuracy = 22.18% (1987 / 8960), Loss = 7.3952
+Epoch:  27%|██████████████▊                                        | 69/256 [21:10<57:23, 18.41s/it]
+Epoch:  27%|███████████████                                        | 70/256 [21:38<57:29, 18.55s/it][Training] step 4900: Accuracy = 23.76% (2129 / 8960), Loss = 7.3392
+Epoch:  31%|████████████████▉                                      | 79/256 [24:21<54:34, 18.50s/it]
+[Training] step 5600: Accuracy = 24.99% (2239 / 8960), Loss = 7.2803
+[Validation] step 5600: Accuracy = 21.76% (195 / 896), Loss = 7.3133
+Saving model to save/task_1/
+Epoch:  35%|███████████████████                                    | 89/256 [27:42<51:59, 18.68s/it]
+[Training] step 6300: Accuracy = 24.74% (2217 / 8960), Loss = 7.2234
+Epoch:  39%|█████████████████████▎                                 | 99/256 [30:37<48:34, 18.56s/it]
+Epoch:  39%|█████████████████████                                 | 100/256 [30:59<48:21, 18.60s/it][Training] step 7000: Accuracy = 20.89% (1872 / 8960), Loss = 7.2994
+Epoch:  43%|██████████████████████▉                               | 109/256 [33:21<44:59, 18.36s/it]
+Epoch:  43%|███████████████████████▏                              | 110/256 [33:44<44:47, 18.41s/it][Training] step 7700: Accuracy = 19.52% (1749 / 8960), Loss = 7.2923
+Epoch:  46%|█████████████████████████                             | 119/256 [35:58<41:25, 18.14s/it]
+[Training] step 8400: Accuracy = 19.83% (1777 / 8960), Loss = 7.3103
+[Validation] step 8400: Accuracy = 16.74% (150 / 896), Loss = 7.3341
+Epoch:  50%|███████████████████████████▏                          | 129/256 [38:25<37:49, 17.87s/it]
+[Training] step 9100: Accuracy = 21.45% (1922 / 8960), Loss = 7.2620
+Epoch:  54%|█████████████████████████████▎                        | 139/256 [41:00<34:30, 17.70s/it]
+Epoch:  55%|█████████████████████████████▌                        | 140/256 [41:18<34:13, 17.71s/it][Training] step 9800: Accuracy = 20.61% (1847 / 8960), Loss = 7.2017
+Epoch:  58%|███████████████████████████████▍                      | 149/256 [43:28<31:13, 17.51s/it]
+[Training] step 10500: Accuracy = 20.75% (1859 / 8960), Loss = 7.1361
+Epoch:  62%|█████████████████████████████████▌                    | 159/256 [45:41<27:52, 17.24s/it]
+[Training] step 11200: Accuracy = 21.34% (1912 / 8960), Loss = 7.0510
+[Validation] step 11200: Accuracy = 16.74% (150 / 896), Loss = 7.0766
+Saving model to save/task_1/
+Epoch:  66%|███████████████████████████████████▋                  | 169/256 [48:20<24:53, 17.16s/it]
+[Training] step 11900: Accuracy = 21.13% (1893 / 8960), Loss = 6.9570
+Epoch:  70%|█████████████████████████████████████▊                | 179/256 [50:45<21:49, 17.01s/it]
+Epoch:  70%|█████████████████████████████████████▉                | 180/256 [51:07<21:34, 17.04s/it][Training] step 12600: Accuracy = 22.01% (1972 / 8960), Loss = 6.8295
+Epoch:  74%|███████████████████████████████████████▊              | 189/256 [53:13<18:52, 16.90s/it]
+[Training] step 13300: Accuracy = 22.60% (2025 / 8960), Loss = 6.6854
+Epoch:  78%|█████████████████████████████████████████▉            | 199/256 [55:25<15:52, 16.71s/it]
+[Training] step 14000: Accuracy = 22.53% (2019 / 8960), Loss = 6.5125
+Epoch:  78%|██████████████████████████████████████████▏           | 200/256 [55:44<15:36, 16.72s/it][Validation] step 14000: Accuracy = 19.53% (175 / 896), Loss = 6.5615
+Epoch:  82%|████████████████████████████████████████████          | 209/256 [57:52<13:00, 16.61s/it]
+Epoch:  82%|████████████████████████████████████████████▎         | 210/256 [58:11<12:44, 16.63s/it][Training] step 14700: Accuracy = 25.65% (2298 / 8960), Loss = 6.2907
+Epoch:  86%|████████████████████████████████████████████▍       | 219/256 [1:00:13<10:10, 16.50s/it]
+Epoch:  86%|████████████████████████████████████████████▋       | 220/256 [1:00:32<09:54, 16.51s/it][Training] step 15400: Accuracy = 26.73% (2395 / 8960), Loss = 6.0607
+Epoch:  89%|██████████████████████████████████████████████▌     | 229/256 [1:02:42<07:23, 16.43s/it]
+Epoch:  90%|██████████████████████████████████████████████▋     | 230/256 [1:03:05<07:07, 16.46s/it][Training] step 16100: Accuracy = 32.66% (2926 / 8960), Loss = 5.7367
+Epoch:  93%|████████████████████████████████████████████████▌   | 239/256 [1:04:58<04:37, 16.31s/it]
+[Training] step 16800: Accuracy = 37.42% (3353 / 8960), Loss = 5.4071
+[Validation] step 16800: Accuracy = 33.93% (304 / 896), Loss = 5.4573
+Saving model to save/task_1/
+Epoch:  97%|██████████████████████████████████████████████████▌ | 249/256 [1:07:43<01:54, 16.32s/it]
+[Training] step 17500: Accuracy = 46.83% (4196 / 8960), Loss = 4.9257
+Epoch: 100%|███████████████████████████████████████████████████▊| 255/256 [1:09:22<00:16, 16.32s/it]Training completed.
+Epoch: 100%|████████████████████████████████████████████████████| 256/256 [1:09:37<00:00, 16.32s/it]
+
+Process finished with exit code 0
