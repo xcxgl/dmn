@@ -1,159 +1,101 @@
-import numpy as np
+#!/usr/bin/env python3
+import os
+
 import tensorflow as tf
-from tensorflow.python.ops import seq2seq, rnn_cell
 
-from models.base_model import BaseModel
-from models.old.episode_module import EpisodeModule
-from utils.nn import weight, batch_norm, dropout
+from read_data import read_babi, get_max_sizes
+from utils.data_utils import load_glove, WordTable
+
+flags = tf.app.flags
+
+# update xc
+# config = tf.ConfigProto(gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction = 0.5),
+#                         device_count = {'GPU':1})
 
 
-class DMN(BaseModel):
-    """ Dynamic Memory Networks (http://arxiv.org/abs/1506.07285)
-        Semantic Memory version: Instead of implementing embedding layer,
-        it uses GloVe instead. (First version of DMN paper.)
-    """
-    def build(self):
-        params = self.params
-        N, L, Q, F = params.batch_size, params.max_sent_size, params.max_ques_size, params.max_fact_count
-        V, d, A = params.glove_size, params.hidden_size, self.words.vocab_size
 
-        # initialize self
-        # placeholders
-        input = tf.placeholder(tf.float32, shape=[N, L, V], name='x')  # [num_batch, sentence_len, glove_dim]
-        question = tf.placeholder(tf.float32, shape=[N, Q, V], name='q')  # [num_batch, sentence_len, glove_dim]
-        answer = tf.placeholder(tf.int64, shape=[N], name='y')  # [num_batch] - one word answer
-        input_mask = tf.placeholder(tf.bool, shape=[N, L], name='x_mask')  # [num_batch, sentence_len]
-        is_training = tf.placeholder(tf.bool)
 
-        # Prepare parameters
-        gru = rnn_cell.GRUCell(d)
+# directories
+flags.DEFINE_string('model', 'dmn', 'Model type - dmn+, dmn, dmn_embed [Default: DMN+]')
+flags.DEFINE_boolean('test', False, 'true for testing, false for training [False]')
+flags.DEFINE_string('data_dir', 'data/tasks_1-20_v1-2/en-10k', 'Data directory [data/tasks_1-20_v1-2/en-10k]')
+flags.DEFINE_string('save_dir', 'save', 'Save path [save]')
 
-        # Input module
-        with tf.variable_scope('input') as scope:
-            input_list = self.make_decoder_batch_input(input)
-            input_states, _ = seq2seq.rnn_decoder(input_list, gru.zero_state(N, tf.float32), gru)
+# training options
+flags.DEFINE_bool('gpu', True, 'Use GPU? [True]')
+flags.DEFINE_integer('batch_size', 128, 'Batch size during training and testing [128]')
+flags.DEFINE_integer('num_epochs', 256, 'Number of epochs for training [256]')
+flags.DEFINE_float('learning_rate', 0.002, 'Learning rate [0.002]')
+flags.DEFINE_boolean('load', False, 'Start training from saved model? [False]')
+flags.DEFINE_integer('acc_period', 10, 'Training accuracy display period [10]')
+flags.DEFINE_integer('val_period', 40, 'Validation period (for display purpose) [40]')
+flags.DEFINE_integer('save_period', 80, 'Save period [80]')
 
-            # Question module
-            scope.reuse_variables()
+# model params
+flags.DEFINE_integer('memory_step', 3, 'Episodic Memory steps [3]')
+flags.DEFINE_string('memory_update', 'relu', 'Episodic meory update method - relu or gru [relu]')
+# flags.DEFINE_bool('memory_tied', False, 'Share memory update weights among the layers? [False]')
+flags.DEFINE_integer('glove_size', 256, 'GloVe size - Only used in dmn [50]')
+flags.DEFINE_integer('embed_size', 80, 'Word embedding size - Used in dmn+, dmn_embed [80]')
+flags.DEFINE_integer('hidden_size', 40, 'Size of hidden units [80]')
 
-            ques_list = self.make_decoder_batch_input(question)
-            questions, _ = seq2seq.rnn_decoder(ques_list, gru.zero_state(N, tf.float32), gru)
-            question_vec = questions[-1]  # use final state
+# train hyperparameters
+flags.DEFINE_float('weight_decay', 0.001, 'Weight decay - 0 to turn off L2 regularization [0.001]')
+flags.DEFINE_float('keep_prob', 1., 'Dropout rate - 1.0 to turn off [1.0]')
+flags.DEFINE_bool('batch_norm', True, 'Use batch normalization? [True]')
 
-        # Masking: to extract fact vectors at end of sentence. (details in paper)
-        input_states = tf.transpose(tf.stack(input_states), [1, 0, 2])  # [N, L, D]
-        facts = []
-        for n in range(N):
-            filtered = tf.boolean_mask(input_states[n, :, :], input_mask[n, :])  # [?, D]
-            padding = tf.zeros(tf.stack([F - tf.shape(filtered)[0], d]))
-            facts.append(tf.concat(axis=0, values=[filtered, padding]))  # [F, D]
+# bAbi dataset params
+flags.DEFINE_integer('task', 0, 'bAbi Task number [1]')
+flags.DEFINE_float('val_ratio', 0.1, 'Validation data ratio to training data [0.1]')
 
-        facked = tf.stack(facts)  # packing for transpose... I hate TF so much
-        facts = tf.unstack(tf.transpose(facked, [1, 0, 2]), num=F)  # F x [N, D]
+FLAGS = flags.FLAGS
 
-        # Episodic Memory
-        with tf.variable_scope('episodic') as scope:
-            episode = EpisodeModule(d, question_vec, facts)
 
-            memory = tf.identity(question_vec)
-            for t in range(params.memory_step):
-                memory = gru(episode.new(memory), memory)[0]
-                scope.reuse_variables()
+def main(_):
+    # update xc: 使用dmn，需要修改data_utils.py中glove的路径，开始写的有问题
+    # 删掉word2vec文件的第一行：352196 256
+    if FLAGS.model == 'dmn':
+        word2vec = load_glove(FLAGS.glove_size)
+        words = WordTable(word2vec, FLAGS.glove_size)
+        from models.old.dmn import DMN
 
-        # Regularizations
-        if params.batch_norm:
-            memory = batch_norm(memory, is_training=is_training)
-        memory = dropout(memory, params.keep_prob, is_training)
+    elif FLAGS.model == 'dmn+':
+        words = WordTable()
+        from models.new.dmn_plus import DMN
 
-        with tf.name_scope('Answer'):
-            # Answer module : feed-forward version (for it is one word answer)
-            w_a = weight('w_a', [d, A])
-            logits = tf.matmul(memory, w_a)  # [N, A]
+    elif FLAGS.model == 'dmn_embed':
+        words = WordTable()
+        from models.old.dmn_embedding import DMN
+    else:
+        print('Unknown model type: %s' % FLAGS.model)
+        return
 
-        with tf.name_scope('Loss'):
-            # Cross-Entropy loss
-            cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=answer)
-            loss = tf.reduce_mean(cross_entropy)
-            total_loss = loss + params.weight_decay * tf.add_n(tf.get_collection('l2'))
+    # Read data
+    train = read_babi(FLAGS.data_dir, FLAGS.task, 'train', FLAGS.batch_size, words)
+    test = read_babi(FLAGS.data_dir, FLAGS.task, 'test', FLAGS.batch_size, words)
+    val = train.split_dataset(FLAGS.val_ratio)
 
-        with tf.variable_scope('Accuracy'):
-            # Accuracy
-            predicts = tf.cast(tf.argmax(logits, 1), 'int32')
-            corrects = tf.equal(predicts, answer)
-            num_corrects = tf.reduce_sum(tf.cast(corrects, tf.float32))
-            accuracy = tf.reduce_mean(tf.cast(corrects, tf.float32))
+    FLAGS.max_sent_size, FLAGS.max_ques_size, FLAGS.max_fact_count = get_max_sizes(train, test, val)
+    print('Word count: %d, Max sentence len : %d' % (words.vocab_size, FLAGS.max_sent_size))
 
-        # Training
-        optimizer = tf.train.AdadeltaOptimizer(params.learning_rate)
-        opt_op = optimizer.minimize(total_loss, global_step=self.global_step)
+    # Modify save dir
+    FLAGS.save_dir += '/task_%d/' % FLAGS.task
+    if not os.path.exists(FLAGS.save_dir):
+        os.makedirs(FLAGS.save_dir, exist_ok=True)
 
-        # placeholders
-        self.x = input
-        self.q = question
-        self.y = answer
-        self.mask = input_mask
-        self.is_training = is_training
+    with tf.Session(config=tf.ConfigProto(log_device_placement=True, device_count={'gpu': 0})) as sess:
+        model = DMN(FLAGS, words)
+        sess.run(tf.global_variables_initializer())
 
-        # tensors
-        self.total_loss = total_loss
-        self.num_corrects = num_corrects
-        self.accuracy = accuracy
-        self.opt_op = opt_op
+        if FLAGS.test:
+            model.load(sess)
+            model.eval(sess, test, name='Test')
+        else:
+            if FLAGS.load: model.load(sess)
+            model.train(sess, train, val)
 
-    def make_decoder_batch_input(self, input):
-        """ Reshape batch data to be compatible with Seq2Seq RNN decoder.
-        :param input: Input 3D tensor that has shape [num_batch, sentence_len, wordvec_dim]
-        :return: list of 2D tensor that has shape [num_batch, wordvec_dim]
-        """
-        input_transposed = tf.transpose(input, [1, 0, 2])  # [L, N, V]
-        return tf.unstack(input_transposed)
-
-    def preprocess_batch(self, batches):
-        """ Vectorizes padding and masks last word of sentence. (EOS token)
-        :param batches: A tuple (input, question, label, mask)
-        :return A tuple (input, question, label, mask)
-        """
-        params = self.params
-        input, question, label = batches
-        N, Q, F, V = params.batch_size, params.max_ques_size, params.max_fact_count, params.embed_size
-
-        # calculate max sentence size
-        L = 0
-        for n in range(N):
-            sent_len = np.sum([len(sentence) for sentence in input[n]])
-            L = max(L, sent_len)
-        params.max_sent_size = L
-
-        # make input and question fixed size
-        new_input = np.zeros([N, L, V])  # zero padding
-        new_question = np.zeros([N, Q, V])
-        new_mask = np.full([N, L], False, dtype=bool)
-        new_labels = []
-
-        for n in range(N):
-            sentence = np.array(input[n]).flatten()  # concat all sentences
-            sentence_len = len(sentence)
-
-            input_mask = [index for index, w in enumerate(sentence) if w == '.']
-            new_input[n, :sentence_len] = [self.words.vectorize(w) for w in sentence]
-
-            sentence_len = len(question[n])
-            new_question[n, :sentence_len] = [self.words.vectorize(w) for w in question[n]]
-
-            new_labels.append(self.words.word_to_index(label[n]))
-
-            # mask on
-            for eos_index in input_mask:
-                new_mask[n, eos_index] = True
-
-        return new_input, new_question, new_labels, new_mask
-
-    def get_feed_dict(self, batches, is_train):
-        input, question, label, mask = self.preprocess_batch(batches)
-        return {
-            self.x: input,
-            self.q: question,
-            self.y: label,
-            self.mask: mask,
-            self.is_training: is_train
-        }
+if __name__ == '__main__':
+    sess = tf.Session(config=tf.ConfigProto(log_device_placement=True, device_count={'gpu': 0}))
+    # config = tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.5),
+    #                         device_count = {'GPU':1})
+    tf.app.run()

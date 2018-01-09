@@ -9,7 +9,7 @@ from utils.data_utils import load_glove, WordTable
 flags = tf.app.flags
 
 # directories
-flags.DEFINE_string('model', 'dmn+', 'Model type - dmn+, dmn, dmn_embed [Default: DMN+]')
+flags.DEFINE_string('model', 'dmn', 'Model type - dmn+, dmn, dmn_embed [Default: DMN+]')
 flags.DEFINE_boolean('test', False, 'true for testing, false for training [False]')
 flags.DEFINE_string('data_dir', 'data/tasks_1-20_v1-2/en-10k', 'Data directory [data/tasks_1-20_v1-2/en-10k]')
 flags.DEFINE_string('save_dir', 'save', 'Save path [save]')
@@ -77,7 +77,10 @@ def main(_):
     if not os.path.exists(FLAGS.save_dir):
         os.makedirs(FLAGS.save_dir, exist_ok=True)
 
-    with tf.Session() as sess:
+
+    # update xc:
+    # 设置GPU
+    with tf.Session(config=tf.ConfigProto(log_device_placement=True, device_count={'gpu': 0})) as sess:
         model = DMN(FLAGS, words)
         sess.run(tf.global_variables_initializer())
 
@@ -89,4 +92,7 @@ def main(_):
             model.train(sess, train, val)
 
 if __name__ == '__main__':
+    # sess = tf.Session(config=tf.ConfigProto(log_device_placement=True, device_count={'gpu': 0}))
+    # config = tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.5),
+    #                         device_count = {'GPU':1})
     tf.app.run()

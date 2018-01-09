@@ -120,17 +120,18 @@ def load_glove(dim):
     """
     word2vec = {}
 
-    path = "data/glove/glove.6B." + str(dim) + 'd'
+    path = "data/glove/glove.6B/glove.6B." + str(dim) + 'd'
     if os.path.exists(path + '.cache'):
         with open(path + '.cache', 'rb') as cache_file:
             word2vec = pickle.load(cache_file)
 
     else:
         # Load n create cache
-        with open(path + '.txt') as f:
+        with open(path + '.txt', encoding='utf-8') as f:
             for line in f:
-                l = line.split()
-                word2vec[l[0]] = [float(x) for x in l[1:]]
+                if len(line) > 20:
+                    l = line.split()
+                    word2vec[l[0]] = [float(x) for x in l[1:]]
 
         with open(path + '.cache', 'wb') as cache_file:
             pickle.dump(word2vec, cache_file)
